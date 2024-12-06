@@ -1,5 +1,8 @@
 //Librerias
 import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
+
 
 //Clase principal
 public class Main{
@@ -10,7 +13,6 @@ public class Main{
         final String user = "skibidi";
         final String pass  = "toilet";
         boolean acceso = false;
-        int intentos = 3;
 
         //Mensaje de bienvenida
         System.out.println("Sistema de inventario del Dojo Cobra Kai");
@@ -106,7 +108,6 @@ public class Main{
             }
         }
 
-
         //Ingresar el precio del producto
         System.out.println("Ingresa el precio del producto: ");
         double precio = leer.nextDouble();
@@ -138,12 +139,100 @@ public class Main{
 
     //OPERAIÓN PARA CARGA MASIVA
     public static void agregarLote(Scanner leer){
-        System.out.println("Ingresar un lote de productos (Carga masiva)");
+        System.out.println("\n--- Carga Masiva de Productos ---");
+        System.out.println("----------------------------------------");
+        System.out.println("Ingresa la ruta del archivo");
+        String rutaArchivo = leer.nextLine();
+
+        File archivo = new File(rutaArchivo);
+
+        //Comprobando si existe el archivo
+        //Usando "!" para negar la preposición
+        if(!archivo.exists()){
+            System.out.println("El archivo no existe, comprueba la ruta e intenta de nuevo");
+            System.out.println("Presiona cualquier tecla para continuar...");
+            leer.nextLine();
+            return;
+        }
+
+        try(Scanner escanearArchivo = new Scanner(archivo)){
+            //Variables de productos
+            int productosAgregados = 0;
+            int productosDuplicados = 0;
+
+            //Saltando la primer linea de encabezados
+            if(escanearArchivo.hasNextLine()){
+                escanearArchivo.nextLine();
+            }
+
+            //Leyendo el archivo
+            while(escanearArchivo.hasNextLine()){
+                String linea = escanearArchivo.nextLine();
+
+                String [] partes = linea.split(";");
+
+                //Comprobando que tengan el formato correcto
+                if(partes.length != 2) {
+                    System.out.println("Error en el producto: " + linea);
+                    System.out.println("El formato correcto es: nombre;precio");
+                    productosDuplicados++;
+                    continue;
+                }
+
+                String nombre = partes[0].trim();
+                double precio = 0;
+
+                try{
+                    precio = Double.parseDouble(partes[1].trim());
+                }catch(NumberFormatException e){
+                    System.out.println("Precio invalido en el producto: " + linea);
+                    productosDuplicados++;
+                    continue;
+                }
+
+                //Verificando el precio del producto
+                if (precio <= 0){
+                    System.out.println("El precio del siguiente producto debe ser mayor a cero: " + linea);
+                    productosDuplicados++;
+                    continue;
+                }
+
+                //Verificar si el producto ya existe
+                if(productoExiste(nombre)) {
+                    System.out.println("El siguiente producto ya existe en el inventario: " + linea);
+                    productosDuplicados++;
+                    continue;
+                }
+
+                //Agregar el producto al inventario
+                if(cantidadProducto < nombreProducto.length){
+                    nombreProducto[cantidadProducto] = nombre;
+                    precioProducto[cantidadProducto] = precio;
+                    cantidadProducto++;
+                    productosAgregados++;
+                }else{
+                    System.out.println("No se pueden agregar más productos, el inventario está lleno.");
+                    productosDuplicados++;
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("Error al abrir el archivo: " + e.getMessage());
+        }
+
+        System.out.println("Productos añadidos de manera exitosa!");
+        System.out.println("Presiona cualquier tecla para continuar...");
+        leer.nextLine();
     }
 
-
-
-
+    //Metodo para analizar si un producto existe
+    public static boolean productoExiste(String nombre){
+        for(int i = 0; i < cantidadProducto; i++){
+            if(nombreProducto[i].equalsIgnoreCase(nombre)){
+                return true;
+            }
+        }
+        return false;
+    }
 
 
 
