@@ -1,4 +1,5 @@
 //Librerias
+import java.sql.SQLOutput;
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -46,7 +47,7 @@ public class Main{
         }
     }
 
-    //Menu del sistema
+    //MAIN MENU
     public static void mainMenu(Scanner leer){
 
         while(true){
@@ -72,7 +73,15 @@ public class Main{
                     agregarLote(leer);
                     break;
                 case 3:
-                    realizarVenta(leer);
+                    //COMPROBAMOS SI HAY PRODUCTOS EN EL INVENTARIO
+                    if(cantidadProducto == 0){
+                        System.out.println("No hay productos en el inventario, agrega antes de realizar una venta");
+                        System.out.println("Presiona cualquier tecla para regresar al menú principal...");
+                        leer.nextLine();
+                        break;
+                    }else {
+                        realizarVenta(leer);
+                    }
                     break;
                 case 4:
                     realizarReporte(leer);
@@ -235,37 +244,106 @@ public class Main{
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     //OPERACIÓN PARA VENDER PRODUCTOS
     public static void realizarVenta(Scanner leer){
-        System.out.println("Realizar una venta");
+        System.out.println("\n--- Realizar una venta ---");
+        System.out.println("----------------------------------------");
+        System.out.println("Ingresa el nombre del cliente (presiona enter para consumidor final");
+        String nombreCliente = leer.nextLine();
+        int nitCliente = 00000000;
+
+        //Verificamos si el cliente puso su nombre
+        if(nombreCliente.isEmpty()){
+            nombreCliente = "C/F";
+        }else{
+            System.out.println("Ingresa el NIT del cliente: ");
+            nitCliente = leer.nextInt();
+            leer.nextLine(); //Limpiar buffer
+        }
+
+        //Registro de productos comprados
+        String[] productosComprados = new String[100];
+        int[] cantidadesComprados = new int[100];
+        double totalCompra = 0.0;
+        int productosCompradosCount = 0;
+
+        boolean continuarComprando = true;
+
+        while(continuarComprando){
+            //Mostrar inventario
+            System.out.println("Productos disponibles:");
+            System.out.println("----------------------------------------");
+            for(int i =0; i < cantidadProducto; i++){
+                if(nombreProducto[i] != null){
+                    System.out.printf("%d. %s - Precio: Q%.2f%n", i + 1, nombreProducto[i], precioProducto[i]);
+                }
+            }
+
+            //Elegir producto a comprar
+            System.out.println("Selecciona el número del producto que deseas comprar");
+            int opcionProducto = leer.nextInt() -1; //Por la posición que tiene en el array
+            leer.nextLine(); //Limpiar buffer
+
+            //Evitar que el cliente elija una opción que no está || numeros negativos
+            if(opcionProducto < 0 || opcionProducto >= cantidadProducto || nombreProducto[opcionProducto] == null){
+                System.out.println("Opción invalida, inténtalo de nuevo");
+                continue;
+            }
+
+            //Ingresar cantidad deseada
+            System.out.println("Ingresa la cantidad que deseas: ");
+            int cantidadDeseada = leer.nextInt();
+            leer.nextLine(); //Limpiar buffer
+
+            //Registrar la compra
+            productosComprados[productosCompradosCount] = nombreProducto[opcionProducto];
+            cantidadesComprados[productosCompradosCount] = cantidadDeseada;
+            totalCompra += precioProducto[opcionProducto] * cantidadDeseada;
+            productosCompradosCount++;
+
+            //Preguntar si desea seguir comprando
+            System.out.println("Quieres añadir otro producto? (Y/N): ");
+            String continuar = leer.nextLine();
+            if(continuar.equalsIgnoreCase("N")){
+                continuarComprando = false;
+            }
+        }
+
+        //Mostrar el resumen de compra
+        System.out.println("\n--- Resumen de la Compra ---");
+        System.out.println("----------------------------------------");
+        System.out.printf("Cliente: %s (NIT: %s)%n", nombreCliente, nitCliente);
+
+        for(int i = 0; i < productosCompradosCount; i++){
+            System.out.printf("%d. %s - Cantidad: %d - Precio: Q%.2f%n", i + 1, productosComprados[i], cantidadesComprados[i], precioProducto[i]);
+        }
+
+        System.out.println("----------------------------------------");
+        System.out.printf("Total de la compra: Q%.2f%n", totalCompra);
+        System.out.println("----------------------------------------");
+        System.out.println("Presiona cualquier tecla para continuar...");
+        leer.nextLine();
+
+        //YA TENEMOS EL RECIBO DE COMPRA, TOCA HACER EL HTML
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     //OPERACIÓN PARA REALIZAR UN REPORTE
     public static void realizarReporte(Scanner leer){
