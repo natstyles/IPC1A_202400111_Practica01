@@ -1,5 +1,6 @@
 //Librerias
-import java.sql.SQLOutput;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -321,14 +322,79 @@ public class Main{
         System.out.println("----------------------------------------");
         System.out.printf("Total de la compra: Q%.2f%n", totalCompra);
         System.out.println("----------------------------------------");
-        System.out.println("Presiona cualquier tecla para continuar...");
+        System.out.println("Presiona cualquier tecla para ver tu factura...");
         leer.nextLine();
 
         //YA TENEMOS EL RECIBO DE COMPRA, TOCA HACER EL HTML
+        generarFactura(nombreCliente, nitCliente, productosComprados, cantidadesComprados, totalCompra, productosCompradosCount);
     }
 
+    //OPERACIÓN PARA GENERAR LA FACTURA
+    public static void generarFactura(String cliente, int nit, String[] productos, int[] cantidades, double total, int productosCount){
+        String nombreArchivo = "factura.html";
+
+        try(PrintWriter writer = new PrintWriter(nombreArchivo)){
+           writer.println("<!DOCTYPE html>");
+              writer.println("<html>");
+                writer.println("<head>");
+                    writer.println("<title>Factura de Compra</title>");
+                    writer.println("<link rel='stylesheet' href='src/style.css'>");
+                writer.println("</head>");
+                writer.println("<body>");
+                writer.println("<h1> Resumen de compra </h1>");
+
+                //COMPROBANDO SI SE ELIGIÓ CF O NOMBRE
+                if(cliente.equalsIgnoreCase("C/F")){
+                    writer.println("<p>Nombre: Consumidor Final </p>");
+                    writer.println("<p>NIT: Consumidor Final </p>");
+                }else {
+                    writer.println("<p>Nombre de cliente: " + cliente + "</p>");
+                    writer.println("<p>NIT: " + nit + "</p>");
+                }
+
+                writer.println("<h2> Productos comprados: </h2>");
+
+            // Iniciar la tabla
+            writer.println("<table>");
+            writer.println("<thead>");
+            writer.println("<tr>");
+            writer.println("<th>#</th>");
+            writer.println("<th>Producto</th>");
+            writer.println("<th>Cantidad</th>");
+            writer.println("<th>Precio Unitario</th>");
+            writer.println("<th>Subtotal</th>");
+            writer.println("</tr>");
+            writer.println("</thead>");
+            writer.println("<tbody>");
+
+            // Ciclo para añadir filas con los productos
+            for (int i = 0; i < productosCount; i++) {
+                double subtotal = cantidades[i] * precioProducto[i]; // Calcular subtotal
+                writer.println("<tr>");
+                writer.printf("<td>%d</td>%n", i + 1); // Número del producto
+                writer.printf("<td>%s</td>%n", productos[i]); // Nombre del producto
+                writer.printf("<td>%d</td>%n", cantidades[i]); // Cantidad
+                writer.printf("<td>Q%.2f</td>%n", precioProducto[i]); // Precio unitario
+                writer.printf("<td>Q%.2f</td>%n", subtotal); // Subtotal
+                writer.println("</tr>");
+            }
+
+            writer.println("</tbody>");
+            writer.println("</table>");
 
 
+            writer.printf("<h2> Total de la compra </h2>");
+                writer.printf("Total a pagar: Q%.2f%n", total);
+                writer.println("<br>");
+                writer.println("<br>");
+                writer.println("<b> Muchas gracias por su compra! </b>");
+                writer.println("</body>");
+                writer.println("</html>");
+
+        } catch (IOException e) {
+            System.out.println("Error al crear el archivo: " + e.getMessage());
+        }
+    }
 
 
 
