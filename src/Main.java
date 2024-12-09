@@ -244,8 +244,10 @@ public class Main{
         return false;
     }
 
-
     //OPERACIÓN PARA VENDER PRODUCTOS
+    //VARIABLE PARA DEFINIR EL NUMERO DE VENTA, NOS SERVIRÁ PARA GENERAR DISTINTAS FACTURAS EN DISTINTOS ARCHIVOS HTML
+    static int numeroVenta = 1;
+
     public static void realizarVenta(Scanner leer){
         System.out.println("\n--- Realizar una venta ---");
         System.out.println("----------------------------------------");
@@ -265,6 +267,7 @@ public class Main{
         //Registro de productos comprados
         String[] productosComprados = new String[100];
         int[] cantidadesComprados = new int[100];
+        double[] preciosComprados = new double[100];
         double totalCompra = 0.0;
         int productosCompradosCount = 0;
 
@@ -299,8 +302,12 @@ public class Main{
             //Registrar la compra
             productosComprados[productosCompradosCount] = nombreProducto[opcionProducto];
             cantidadesComprados[productosCompradosCount] = cantidadDeseada;
+            preciosComprados[productosCompradosCount] = precioProducto[opcionProducto]; // Registrar precio unitario
             totalCompra += precioProducto[opcionProducto] * cantidadDeseada;
             productosCompradosCount++;
+
+            //Actualizar las ventas del producto
+            ventasProducto[opcionProducto] += cantidadDeseada;
 
             //Preguntar si desea seguir comprando
             System.out.println("Quieres añadir otro producto? (Y/N): ");
@@ -326,12 +333,13 @@ public class Main{
         leer.nextLine();
 
         //YA TENEMOS EL RECIBO DE COMPRA, TOCA HACER EL HTML
-        generarFactura(nombreCliente, nitCliente, productosComprados, cantidadesComprados, totalCompra, productosCompradosCount);
+        generarFactura(nombreCliente, nitCliente, productosComprados, cantidadesComprados, preciosComprados, totalCompra, productosCompradosCount);
+        numeroVenta++;
     }
 
     //OPERACIÓN PARA GENERAR LA FACTURA
-    public static void generarFactura(String cliente, int nit, String[] productos, int[] cantidades, double total, int productosCount){
-        String nombreArchivo = "factura.html";
+    public static void generarFactura(String cliente, int nit, String[] productos, int[] cantidades, double[] precios, double total, int productosCount){
+        String nombreArchivo = "Factura no. "+"("+numeroVenta+").html";
 
         try(PrintWriter writer = new PrintWriter(nombreArchivo)){
            writer.println("<!DOCTYPE html>");
@@ -369,12 +377,12 @@ public class Main{
 
             // Ciclo para añadir filas con los productos
             for (int i = 0; i < productosCount; i++) {
-                double subtotal = cantidades[i] * precioProducto[i]; // Calcular subtotal
+                double subtotal = cantidades[i] * precios[i]; // Calcular subtotal
                 writer.println("<tr>");
                 writer.printf("<td>%d</td>%n", i + 1); // Número del producto
                 writer.printf("<td>%s</td>%n", productos[i]); // Nombre del producto
                 writer.printf("<td>%d</td>%n", cantidades[i]); // Cantidad
-                writer.printf("<td>Q%.2f</td>%n", precioProducto[i]); // Precio unitario
+                writer.printf("<td>Q%.2f</td>%n", precios[i]); // Precio unitario
                 writer.printf("<td>Q%.2f</td>%n", subtotal); // Subtotal
                 writer.println("</tr>");
             }
@@ -396,27 +404,80 @@ public class Main{
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    //OPERACIÓN PARA REALIZAR UN REPORTE DE VENTAS
+    //VARIABLE PARA CONTAR LAS VENTAS DE CADA PRODUCTO
+    static int[] ventasProducto = new int[100];
 
     //OPERACIÓN PARA REALIZAR UN REPORTE
     public static void realizarReporte(Scanner leer){
         System.out.println("Realizar un reporte");
         System.out.println("----------------------------------------");
-        System.out.println("Elije una opción:");
         System.out.println("1. Top 5 de productos más vendidos");
         System.out.println("2. Reporte total de ventas");
+        System.out.println("Elije una opción para continuar:");
+        int opcion = leer.nextInt();
+        leer.nextLine(); //Limpiar buffer
+
+        switch(opcion){
+            case 1:
+                topProductos(leer);
+                break;
+            case 2:
+                reporteTotal(leer);
+                break;
+            default:
+                System.out.println("Opción invalida, intenta de nuevo");
+        }
+    }
+
+    //FUNCIÓN DE TOP 5 PRODUCTOS
+    public static void topProductos(Scanner leer){
+        //Copias de los arrays de los productos vendidos
+        String[] copiaProductos = nombreProducto.clone();
+        int[] copiaVentas = ventasProducto.clone();
+
+        //Ordenar los productos por ventas de mayor a menor
+        for (int i = 0; i < copiaVentas.length - 1; i++){
+            for(int j = 0; j < copiaVentas.length - i - 1; j++){
+                if(copiaVentas[j] < copiaVentas[j + 1]){
+                    //Vamos reordenando las ventas
+                    int tempVentas = copiaVentas[j];
+                    copiaVentas[j] = copiaVentas[j + 1];
+                    copiaVentas[j + 1] = tempVentas;
+
+                    //Ahora reordenamos los productos
+                    String tempProductos = copiaProductos[j];
+                    copiaProductos[j] = copiaProductos[j + 1];
+                    copiaProductos[j + 1] = tempProductos;
+                }
+            }
+        }
+
+        //MOSTRANDO EL TOP 5
+        System.out.println("\n--- Top 5 de productos más vendidos ---");
+        System.out.println("----------------------------------------");
+
+        for(int i = 0; i < 5 && i < copiaProductos.length && copiaProductos[i] != null; i++) {
+            System.out.printf("%d. %s - Cantidad Vendida: %d%n", i + 1, copiaProductos[i], copiaVentas[i]);
+        }
+
+        System.out.println("----------------------------------------");
+        System.out.println("Presiona cualquier tecla para continuar...");
+        leer.nextLine();
+    }
+
+    //FUNCION DE REPORTE TOTAL DE PRODCTOS
+    public static void reporteTotal(Scanner leer){
+        System.out.println("\n--- Reporte Total de Ventas ---");
+        System.out.println("----------------------------------------");
+        for(int i = 0; i< cantidadProducto; i++){
+            if(nombreProducto[i] != null){
+                System.out.printf("%d. %s - Cantidad Vendida: %d%n", i + 1, nombreProducto[i], ventasProducto[i]);
+            }
+        }
+        System.out.println("----------------------------------------");
+        System.out.println("Presiona cualquier tecla para continuar...");
+        leer.nextLine();
+
     }
 }
