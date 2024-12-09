@@ -12,8 +12,8 @@ public class Main{
         Scanner leer = new Scanner(System.in);
 
         //VARIABLES DE INICIO DE SESIÓN
-        final String user = "skibidi";
-        final String pass  = "toilet";
+        final String user = "sensei_202400111";
+        final String pass  = "ipc1_202400111";
         boolean acceso = false;
 
         //Mensaje de bienvenida
@@ -23,7 +23,7 @@ public class Main{
         System.out.println("----------------------------------------");
 
         //Validando certificados
-        while (acceso == false){
+        do{
             System.out.println("Ingrese su usuario: ");
             String tryuser = leer.nextLine();
             System.out.println("Ingrese su contraseña: ");
@@ -39,13 +39,11 @@ public class Main{
             }else{
                 System.out.println("Certificados incorrectos, inténtalo nuevamente");
                 System.out.println("----------------------------------------");
-                }
             }
+        }while(!acceso);
 
         //LLEVAR AL USUARIO AL MENÚ PRINCIPAL
-        if (acceso == true){
-            mainMenu(leer);
-        }
+        mainMenu(leer);
     }
 
     //MAIN MENU
@@ -90,6 +88,11 @@ public class Main{
                 case 5:
                     System.out.println("Saliendo del sistema...");
                     System.exit(0);
+                    break;
+                default:
+                    System.out.println("Opción invalida, intenta de nuevo");
+                    System.out.println("Presiona cualquier tecla para regresar al menú principal...");
+                    leer.nextLine();
                     break;
             }
         }
@@ -253,7 +256,7 @@ public class Main{
         System.out.println("----------------------------------------");
         System.out.println("Ingresa el nombre del cliente (presiona enter para consumidor final");
         String nombreCliente = leer.nextLine();
-        int nitCliente = 00000000;
+        int nitCliente = 0;
 
         //Verificamos si el cliente puso su nombre
         if(nombreCliente.isEmpty()){
@@ -322,8 +325,10 @@ public class Main{
         System.out.println("----------------------------------------");
         System.out.printf("Cliente: %s (NIT: %s)%n", nombreCliente, nitCliente);
 
-        for(int i = 0; i < productosCompradosCount; i++){
-            System.out.printf("%d. %s - Cantidad: %d - Precio: Q%.2f%n", i + 1, productosComprados[i], cantidadesComprados[i], precioProducto[i]);
+        for (int i = 0; i < productosCompradosCount; i++) {
+            double subtotal = preciosComprados[i] * cantidadesComprados[i]; // Calcular subtotal
+            System.out.printf("%d. %s - Cantidad: %d - Precio: Q%.2f - Subtotal: Q%.2f%n",
+                    i + 1, productosComprados[i], cantidadesComprados[i], preciosComprados[i], subtotal);
         }
 
         System.out.println("----------------------------------------");
@@ -339,14 +344,32 @@ public class Main{
 
     //OPERACIÓN PARA GENERAR LA FACTURA
     public static void generarFactura(String cliente, int nit, String[] productos, int[] cantidades, double[] precios, double total, int productosCount){
-        String nombreArchivo = "Factura no. "+"("+numeroVenta+").html";
+        //DEFINIENDO EL DIRECTORIO DE LAS FACTURAS
+        String directorio = "src/Facturas";
+        File carpetaFacturas = new File(directorio);
+
+
+        //CODIGO CREADO POR RICHARD ARIZANDIETA, LA COPIA PARCIAL O TOTAL DE ESTE CODIGO SERÁ REPORTADA CON LAS AUTORIDADES CORRESPONDIENTES CON RESPECTIVAS SANCIONES ACADEMICAS
+
+        // Verificar si la carpeta existe
+        if (!carpetaFacturas.exists()) {
+            if (carpetaFacturas.mkdirs()) {
+                System.out.println("Carpeta 'Facturas' creada exitosamente.");
+            } else {
+                System.out.println("Error al crear la carpeta 'Facturas'.");
+                return;
+            }
+        }
+
+        //RUTA COMPLETA DEL ARCHIVO
+        String nombreArchivo = directorio + "/Factura no. (" + numeroVenta + ").html";
 
         try(PrintWriter writer = new PrintWriter(nombreArchivo)){
            writer.println("<!DOCTYPE html>");
               writer.println("<html>");
                 writer.println("<head>");
                     writer.println("<title>Factura de Compra</title>");
-                    writer.println("<link rel='stylesheet' href='src/style.css'>");
+                    writer.println("<link rel='stylesheet' href='../style.css'>");
                 writer.println("</head>");
                 writer.println("<body>");
                 writer.println("<h1> Resumen de compra </h1>");
@@ -478,6 +501,5 @@ public class Main{
         System.out.println("----------------------------------------");
         System.out.println("Presiona cualquier tecla para continuar...");
         leer.nextLine();
-
     }
 }

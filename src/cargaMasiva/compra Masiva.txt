@@ -1,7 +1,7 @@
 Producto;Precio
-Pan;50
-Gato;15
-Soda;10
-Perro;5
-Cerveza;20
-Cigarros;30
+Pachon Dojo;25
+Sudadero Cobra Kai;150
+Cinta de Cabeza;100
+Camisa Dojo;50
+Uniforme Completo;2000
+Camiseta Dojo;30
